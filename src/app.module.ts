@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { CatsModule } from './cats/cats.module';
 import { UsersModule } from './users/users.module';
 import { LoggerMiddleware } from './logger/logger.middleware';
+import { MongooseModule } from '@nestjs/mongoose';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -19,6 +20,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     // }),
     CatsModule,
     UsersModule,
+    MongooseModule.forRoot('mongodb://localhost/nestjs'),
   ],
   controllers: [AppController],
   providers: [AppService],
