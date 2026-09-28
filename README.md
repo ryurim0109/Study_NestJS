@@ -33,6 +33,61 @@ $ pnpm install
 
 ## Compile and run the project
 
+### 환경 설정과 절대 경로 import
+
+환경 파일에 `MONGODB_URI`를 설정합니다. `PORT`는 생략하면 `8000`입니다.
+실행할 때 지정한 `NODE_ENV`에 따라 다음 파일을 읽습니다.
+
+- `test`: `.env.test`
+- `production`: `.env.production`
+- 그 외 또는 미지정: `.env`
+
+`.env.test`와 `.env.production`은 기존 `.env`를 복사한 파일입니다.
+각 파일의 값을 해당 환경에 맞게 변경하세요. 세 파일 모두 Git에서 제외됩니다.
+실행 환경에 직접 설정한 환경 변수가 파일의 값보다 우선합니다.
+
+```bash
+# 로컬 개발
+pnpm run start:dev
+
+# 테스트 (Jest도 NODE_ENV의 기본값을 test로 설정)
+NODE_ENV=test pnpm run test:e2e
+
+# 프로덕션
+pnpm run build
+NODE_ENV=production pnpm run start:prod
+```
+
+환경 변수 읽기, 기본값, 검증은 `src/config/configuration.ts`에서 관리합니다.
+새 설정도 이 파일의 반환 객체와 `Configuration` 타입에 추가한 뒤 사용하세요.
+MongoDB 주소가 없거나 포트가 유효하지 않으면 시작 시 오류가 발생합니다.
+
+```ts
+import { ConfigService } from '@nestjs/config';
+import type { Configuration } from '@config/configuration';
+
+constructor(private readonly config: ConfigService<Configuration, true>) {}
+
+// 서비스 메서드 안에서 사용
+const port = this.config.get('app.port', { infer: true });
+const uri = this.config.get('database.uri', { infer: true });
+```
+
+프로젝트 내부 import는 `@/`를 `src/` 기준으로 사용합니다.
+공통 코드에는 `@common/`, 설정에는 `@config/`도 사용할 수 있습니다.
+
+```ts
+import { CatsModule } from '@/cats/cats.module';
+import { HttpExceptionFilter } from '@common/exceptions/http-exception.filter';
+import configuration from '@config/configuration';
+```
+
+Nest CLI가 빌드할 때 alias를 실행 가능한 경로로 변환합니다.
+단위 테스트와 E2E 테스트에도 alias 매핑이 적용되어 있습니다.
+운영 실행 전에는 `pnpm run build`를 실행하세요.
+
+설정 방식 참고: [NestJS Configuration 문서](https://docs.nestjs.com/techniques/configuration).
+
 ```bash
 # development
 $ pnpm run start
@@ -45,6 +100,10 @@ $ pnpm run start:prod
 ```
 
 ## Run tests
+
+현재 Jest의 CommonJS 설정에서 Nest 12의 ESM 패키지를 불러오려면
+Node.js 24.9 이상을 사용하세요. 단위 테스트와 E2E는 Node.js 24.12에서 확인했습니다.
+E2E의 기본 HTTP 테스트는 MongoDB 연결을 mock으로 대체합니다.
 
 ```bash
 # unit tests
