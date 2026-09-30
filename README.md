@@ -36,7 +36,8 @@ $ pnpm install
 ### 환경 설정과 절대 경로 import
 
 환경 파일에 `MONGODB_URI`를 설정합니다. `PORT`는 생략하면 `8000`입니다.
-실행할 때 지정한 `NODE_ENV`에 따라 다음 파일을 읽습니다.
+`package.json`의 실행 명령어가 `NODE_ENV`를 지정하므로 `.env` 파일에 넣을 필요가 없습니다.
+지정된 `NODE_ENV`에 따라 다음 파일을 읽습니다.
 
 - `test`: `.env.test`
 - `production`: `.env.production`
@@ -50,12 +51,12 @@ $ pnpm install
 # 로컬 개발
 pnpm run start:dev
 
-# 테스트 (Jest도 NODE_ENV의 기본값을 test로 설정)
-NODE_ENV=test pnpm run test:e2e
+# 테스트
+pnpm run test:e2e
 
 # 프로덕션
 pnpm run build
-NODE_ENV=production pnpm run start:prod
+pnpm run start:prod
 ```
 
 환경 변수 읽기, 기본값, 검증은 `src/config/configuration.ts`에서 관리합니다.

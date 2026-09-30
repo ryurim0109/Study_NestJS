@@ -6,6 +6,7 @@ import { CatsModule } from '@/cats/cats.module';
 import { UsersModule } from '@/users/users.module';
 import { LoggerMiddleware } from '@/logger/logger.middleware';
 import { MongooseModule } from '@nestjs/mongoose';
+import type { MongooseModuleOptions } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from '@config/configuration';
 import type { Configuration } from '@config/configuration';
@@ -33,8 +34,13 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     UsersModule,
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService<Configuration, true>) => ({
+      useFactory: (
+        config: ConfigService<Configuration, true>,
+      ): MongooseModuleOptions => ({
         uri: config.get('database.uri', { infer: true }),
+        onConnectionCreate: (connection) => {
+          connection.set('debug', process.env.NODE_ENV === 'development');
+        },
       }),
     }),
   ],
